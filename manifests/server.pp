@@ -1,9 +1,18 @@
 class quantum::server (
-  $log_file = "/var/log/quantum/server.log",
+  $keystone_password,
+  $log_file        = "/var/log/quantum/server.log",
+  $auth_type       = "keystone",
+  $auth_host       = "localhost",
+  $auth_port       = "35357",
+# $auth_uri        = "http://localhost:5000",
+  $keystone_tenant = "services",
+  $keystone_user   = "quantum",
+  $package_ensure  = 'present'
 ) inherits quantum {
   require 'keystone::python'
 
   Package["quantum-server"] -> Quantum_api_config<||>
+  Package["quantum-server"] -> Quantum_config<||>
   Quantum_config<||> ~> Service["quantum-server"]
   Quantum_api_config<||> ~> Service["quantum-server"]
 

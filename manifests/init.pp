@@ -1,32 +1,24 @@
 class quantum (
-  $enabled              = true,
-  $package_ensure       = true,
-  $log_verbose          = "False",
-  $log_debug            = "False",
+  $rabbit_password,
+  $verbose          = "False",
+  $debug            = "False",
 
   $bind_host            = "0.0.0.0",
   $bind_port            = "9696",
   $sql_connection       = "sqlite:///var/lib/quantum/quantum.sqlite",
-
-  $auth_type            = "keystone",
-  $auth_host            = "localhost",
-  $auth_port            = "35357",
-  $auth_uri             = "http://localhost:5000",
-  $keystone_tenant      = "service",
-  $keystone_user        = "quantum",
-  $keystone_password    = "ChangeMe",
-
   $rabbit_host          = "localhost",
   $rabbit_port          = "5672",
   $rabbit_user          = "guest",
-  $rabbit_password      = "guest",
   $rabbit_virtual_host  = "/",
 
   $control_exchange     = "quantum",
 
   $core_plugin            = "quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2",
   $mac_generation_retries = 16,
-  $dhcp_lease_duration    = 120
+  $dhcp_lease_duration    = 120,
+  $auth_strategy          = 'keystone',
+  $enabled                = true,
+  $package_ensure         = 'present'
 ) {
   include quantum::params
 
@@ -58,23 +50,23 @@ class quantum (
   }
 
   quantum_config {
-    "DEFAULT/verbose":    value => $log_verbose;
-    "DEFAULT/debug":      value => $log_debug;
+    "DEFAULT/verbose":                value => $verbose;
+    "DEFAULT/debug":                  value => $debug;
 
-    "DEFAULT/bind_host":  value => $bind_host;
-    "DEFAULT/bind_port":  value => $bind_port;
+    "DEFAULT/bind_host":              value => $bind_host;
+    "DEFAULT/bind_port":              value => $bind_port;
 
-    "DEFAULT/sql_connection":       value => $sql_connection;
+    "DEFAULT/sql_connection":         value => $sql_connection;
 
-    "DEFAULT/auth_strategy":        value => $auth_strategy;
+    "DEFAULT/auth_strategy":          value => $auth_strategy;
 
-    "DEFAULT/rabbit_host":          value => $rabbit_host;
-    "DEFAULT/rabbit_port":          value => $rabbit_port;
-    "DEFAULT/rabbit_user":          value => $rabbit_user;
-    "DEFAULT/rabbit_password":      value => $rabbit_password;
-    "DEFAULT/rabbit_virtual_host":  value => $rabbit_password;
+    "DEFAULT/rabbit_host":            value => $rabbit_host;
+    "DEFAULT/rabbit_port":            value => $rabbit_port;
+    "DEFAULT/rabbit_userid":          value => $rabbit_user;
+    "DEFAULT/rabbit_password":        value => $rabbit_password;
+    "DEFAULT/rabbit_virtual_host":    value => $rabbit_virtual_host;
 
-    "DEFAULT/control_exchange":     value => $control_exchange;
+    "DEFAULT/control_exchange":       value => $control_exchange;
 
     "DEFAULT/core_plugin":            value => $core_plugin;
     "DEFAULT/mac_generation_retries": value => $mac_generation_retries;

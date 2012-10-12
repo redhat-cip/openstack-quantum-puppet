@@ -1,16 +1,21 @@
 class quantum::agents::dhcp (
-  $state_path         = "/var/lib/quantum",
-  $interface_driver   = "quantum.agent.linux.interface.OVSInterfaceDriver",
-  $dhcp_driver        = "quantum.agent.linux.dhcp.Dnsmasq",
-  $use_namespaces     = "False",
-  $root_helper        = "sudo /usr/bin/quantum-rootwrap /etc/quantum/rootwrap.conf"
+  $state_path       = "/var/lib/quantum",
+  $interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver",
+  $dhcp_driver      = "quantum.agent.linux.dhcp.Dnsmasq",
+  $use_namespaces   = "False",
+  $root_helper      = "sudo /usr/bin/quantum-rootwrap /etc/quantum/rootwrap.conf",
+  $debug            = 'False'
 ) inherits quantum {
+
+
+  Package['quantum'] -> Package["quantum-dhcp-agent"]
   Package["quantum-dhcp-agent"] -> Quantum_dhcp_agent_config<||>
+  Package["quantum-dhcp-agent"] -> Quantum_config<||>
   Quantum_config<||> ~> Service["quantum-dhcp-service"]
   Quantum_dhcp_agent_config<||> ~> Service["quantum-dhcp-service"]
 
   quantum_dhcp_agent_config {
-    "DEFAULT/debug":              value => $log_debug;
+    "DEFAULT/debug":              value => $debug;
     "DEFAULT/state_path":         value => $state_path;
     "DEFAULT/interface_driver":   value => $interface_driver;
     "DEFAULT/dhcp_driver":        value => $dhcp_driver;
@@ -21,7 +26,6 @@ class quantum::agents::dhcp (
   package { 'quantum-dhcp-agent':
     name    => $::quantum::params::dhcp_package,
     ensure  => $package_ensure,
-    require => Class['quantum'],
   }
 
   if $enabled {
