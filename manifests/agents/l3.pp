@@ -6,7 +6,7 @@ class quantum::agents::l3 (
   $external_network_bridge      = 'br-ex',
   $auth_url                     = 'http://localhost:5000/v2.0',
   $auth_region                  = 'RegionOne',
-  $auth_tenant                  = 'service',
+  $auth_tenant                  = 'services',
   $auth_user                    = 'quantum',
   $auth_password                = 'password',
   $root_helper                  = 'sudo /usr/bin/quantum-rootwrap /etc/quantum/rootwrap.conf',
@@ -14,7 +14,7 @@ class quantum::agents::l3 (
   $router_id                    = '7e5c2aca-bbac-44dd-814d-f2ea9a4003e4',
   $gateway_external_net_id      = '3f8699d7-f221-421a-acf5-e41e88cfd54f',
   $handle_internal_only_routers = 'True',
-  $external_network_bridge      = 'br-ex',
+  #$external_network_bridge      = 'br-ex',
   $metadata_ip                  = '169.254.169.254',
   $metadata_port                = 8775,
   $polling_interval             = 3
@@ -29,6 +29,7 @@ class quantum::agents::l3 (
 
   quantum_l3_agent_config {
     'DEFAULT/debug':                          value => $debug;
+    'DEFAULT/auth_url':                       value => $auth_url;
     'DEFAULT/auth_host':                      value => $auth_host;
     'DEFAULT/auth_port':                      value => $auth_port;
     'DEFAULT/admin_tenant_name':              value => $auth_tenant;
@@ -58,5 +59,8 @@ class quantum::agents::l3 (
     enable  => $enabled,
     ensure  => $ensure,
     require => [Package[$::quantum::params::l3_agent_package], Class['quantum']],
+    hasstatus  => true,
+    hasrestart => true,  
   }
+
 }

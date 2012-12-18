@@ -14,13 +14,7 @@ class quantum::server (
   require 'keystone::python'
 
   Package['quantum-server'] -> Quantum_api_config<||>
-  Package['quantum-server'] -> Quantum_config<||>
-  Quantum_config<||> ~> Service['quantum-server']
   Quantum_api_config<||> ~> Service['quantum-server']
-
-  quantum_config {
-    'DEFAULT/log_file':  value => $log_file
-  }
 
   quantum_api_config {
     'filter:authtoken/auth_host':         value => $auth_host;
@@ -46,6 +40,7 @@ class quantum::server (
     ensure     => $service_ensure,
     enable     => $enabled,
     hasstatus  => true,
-    hasrestart => true
+    hasrestart => true,
+    subscribe  => [Service['quantum-plugin-ovs-service']],
   }
 }
