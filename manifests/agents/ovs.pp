@@ -25,14 +25,16 @@ class quantum::agents::ovs (
   vs_bridge {$integration_bridge:
     external_ids => "bridge-id=${ingration_bridge}",
     ensure       => present,
-    require      => Service['quantum-plugin-ovs-service'],
+    require      => Service['openvswitch-switch'],
+    notify       => Service['quantum-plugin-ovs-service'],
   }
 
   if $enable_tunneling {
     vs_bridge {$tunnel_bridge:
       external_ids => "bridge-id=${tunnel_bridge}",
       ensure       => present,
-      require      => Service['quantum-plugin-ovs-service'],
+      require      => Service['openvswitch-switch'],
+      notify       => Service['quantum-plugin-ovs-service'],
     }
   }
 

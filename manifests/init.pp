@@ -22,6 +22,7 @@ class quantum (
   include 'quantum::params'
 
   Package['quantum'] -> Quantum_config<||>
+#  Quantum_config<||> ~> Service["quantum-server"]
 
   file {'/etc/quantum':
     ensure  => directory,
@@ -32,8 +33,8 @@ class quantum (
   }
 
   package {'quantum':
-    name   => $::quantum::params::package_name,
-    ensure => $package_ensure
+    name    => $::quantum::params::package_name,
+    ensure  => $package_ensure,
   }
 
   quantum_config {
