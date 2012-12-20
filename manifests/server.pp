@@ -14,6 +14,8 @@ class quantum::server (
   require 'keystone::python'
 
   Package['quantum-server'] -> Quantum_api_config<||>
+  Package['quantum-server'] -> Quantum_config<||>
+  Quantum_config<||> ~> Service['quantum-server']
   Quantum_api_config<||> ~> Service['quantum-server']
 
   quantum_api_config {

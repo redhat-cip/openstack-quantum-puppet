@@ -38,11 +38,10 @@ class quantum::agents::ovs (
 
   if $use_bridge_uplink {
     quantum::plugins::ovs::bridge{$bridge_mappings:
-      require      => Service['quantum-plugin-ovs-service'],
+      notify  => Service['quantum-plugin-ovs-service'],
     }
     quantum::plugins::ovs::port{$bridge_uplinks:
-      #require      => Service['quantum-plugin-ovs-service'],
-      require => [Quantum::Plugins::Ovs::Bridge[$bridge_mappings],Service['quantum-plugin-ovs-service']],
+      notify  => Service['quantum-plugin-ovs-service'],
     }
   }
 
@@ -62,12 +61,11 @@ class quantum::agents::ovs (
   }
 
   service { 'quantum-plugin-ovs-service':
-    name    => $::quantum::params::ovs_agent_service,
-    enable  => $enable,
-    ensure  => $service_ensure,
-    require => [Package['quantum-plugin-ovs-agent']],
+    name       => $::quantum::params::ovs_agent_service,
+    enable     => $enable,
+    ensure     => $service_ensure,
+    require    => [Package['quantum-plugin-ovs-agent']],
     hasstatus  => true,
     hasrestart => true,
   }
-
 }
