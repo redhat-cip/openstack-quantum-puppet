@@ -3,9 +3,7 @@ class quantum::plugins::ovs (
   $sql_connection       = 'sqlite:////var/lib/quantum/ovs.sqlite',
   $sql_max_retries      = 10,
   $reconnect_interval   = 2,
-  $use_bridge_uplink    = true,
-  $bridge_mappings      = ['default:br-ex'],
-  #$bridge_uplinks       = ['br-virtual:eth1'],
+  $bridge_mappings      = ['default:br-eth1'],
   $tenant_network_type  = 'vlan',
   $network_vlan_ranges  = 'physnet1:1000:2000',
   $integration_bridge   = 'br-int',
@@ -58,10 +56,6 @@ class quantum::plugins::ovs (
     'AGENT/root_helper':            value => $root_helper;
   }
 
-  if $use_bridge_uplink {
-    quantum_plugin_ovs {'OVS/bridge_mappings': value => $br_map_str;}
-  }
-
   if ($tenant_network_type == 'gre') and ($enable_tunneling) {
     quantum_plugin_ovs {
       'OVS/enable_tunneling':   value => 'True';
@@ -73,6 +67,7 @@ class quantum::plugins::ovs (
   if ($tenant_network_type == 'vlan') {
     quantum_plugin_ovs {
       'OVS/network_vlan_ranges':      value => $network_vlan_ranges;
+      'OVS/bridge_mappings':          value => $br_map_str;
     }
   }
 }
