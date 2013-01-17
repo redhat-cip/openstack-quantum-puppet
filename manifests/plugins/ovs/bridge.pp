@@ -7,4 +7,3 @@ define quantum::plugins::ovs::bridge {
     external_ids => "bridge-id=${bridge}"
   }
 }
-

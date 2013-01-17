@@ -58,5 +58,8 @@ class quantum::agents::dhcp (
     enable  => $enabled,
     ensure  => $ensure,
     require => [Package['quantum-dhcp-agent'], Class['quantum']],
+    hasstatus  => true,
+    hasrestart => true,
   }
+
 }
