@@ -3,7 +3,7 @@ class quantum::plugins::ovs (
   $sql_connection       = 'sqlite:////var/lib/quantum/ovs.sqlite',
   $sql_max_retries      = 10,
   $reconnect_interval   = 2,
-  $bridge_mappings      = ['physnet1:br-virtual'],
+  $bridge_mappings      = ['default:br-eth1'],
   $tenant_network_type  = 'vlan',
   $network_vlan_ranges  = 'physnet1:1000:2000',
   $integration_bridge   = 'br-int',
@@ -16,7 +16,7 @@ class quantum::plugins::ovs (
 
   include 'quantum::params'
   require 'vswitch::ovs'
-
+  
   Package['quantum'] -> Package['quantum-plugin-ovs']
   Package['quantum-plugin-ovs'] -> Quantum_plugin_ovs<||>
   Quantum_plugin_ovs<||> ~> Service<| title == 'quantum-server' |>
@@ -51,9 +51,7 @@ class quantum::plugins::ovs (
     'DATABASE/sql_max_retries':     value => $sql_max_retries;
     'DATABASE/reconnect_interval':  value => $reconnect_interval;
     'OVS/integration_bridge':       value => $integration_bridge;
-    'OVS/network_vlan_ranges':      value => $network_vlan_ranges;
     'OVS/tenant_network_type':      value => $tenant_network_type;
-    'OVS/bridge_mappings':          value => $br_map_str;
     'AGENT/polling_interval':       value => $polling_interval;
     'AGENT/root_helper':            value => $root_helper;
   }
@@ -63,6 +61,13 @@ class quantum::plugins::ovs (
       'OVS/enable_tunneling':   value => 'True';
       'OVS/tunnel_bridge':      value => $tunnel_bridge;
       'OVS/tunnel_id_ranges':   value => $tunnel_id_ranges;
+    }
+  }
+
+  if ($tenant_network_type == 'vlan') {
+    quantum_plugin_ovs {
+      'OVS/network_vlan_ranges':      value => $network_vlan_ranges;
+      'OVS/bridge_mappings':          value => $br_map_str;
     }
   }
 }

@@ -1,8 +1,9 @@
 class quantum::agents::ovs (
   $package_ensure       = 'present',
   $enabled              = true,
-  $bridge_uplinks       = ['br-virtual:eth1'],
-  $bridge_mappings      = ['physnet1:br-virtual'],
+  $bridge_uplinks       = ['br-ex:eth1'],
+  $use_bridge_uplink    = true,
+  $bridge_mappings      = ['default:br-ex'],
   $integration_bridge   = 'br-int',
   $enable_tunneling     = false,
   $local_ip             = false,
@@ -17,28 +18,32 @@ class quantum::agents::ovs (
   include 'quantum::params'
   require 'vswitch::ovs'
 
-  Package['quantum'] ->  Package['quantum-plugin-ovs-agent']
+  Package['quantum-plugin-ovs'] ->  Package['quantum-plugin-ovs-agent']
   Package['quantum-plugin-ovs-agent'] -> Quantum_plugin_ovs<||>
+  Quantum_plugin_ovs<||> ~> Service["quantum-plugin-ovs-service"]
+  Quantum_config<||> ~> Service['quantum-plugin-ovs-service']
 
-  vswitch::bridge {$integration_bridge:
-    external_ids => "bridge-id=${ingration_bridge}",
+  vs_bridge {$integration_bridge:
     ensure       => present,
-    require      => Service['quantum-plugin-ovs-service'],
+    require      => Service['openvswitch-switch'],
+    notify       => Service['quantum-plugin-ovs-service'],
   }
 
   if $enable_tunneling {
-    vswitch::bridge {$tunnel_bridge:
-      external_ids => "bridge-id=${tunnel_bridge}",
+    vs_bridge {$tunnel_bridge:
       ensure       => present,
-      require      => Service['quantum-plugin-ovs-service'],
+      require      => Service['openvswitch-switch'],
+      notify       => Service['quantum-plugin-ovs-service'],
     }
   }
 
-  quantum::plugins::ovs::bridge{$bridge_mappings:
-    require      => Service['quantum-plugin-ovs-service'],
-  }
-  quantum::plugins::ovs::port{$bridge_uplinks:
-    require      => Service['quantum-plugin-ovs-service'],
+  if $use_bridge_uplink {
+    quantum::plugins::ovs::bridge{$bridge_mappings:
+      notify  => Service['quantum-plugin-ovs-service'],
+    }
+    quantum::plugins::ovs::port{$bridge_uplinks:
+      notify  => Service['quantum-plugin-ovs-service'],
+    }
   }
 
   package { 'quantum-plugin-ovs-agent':
@@ -57,9 +62,11 @@ class quantum::agents::ovs (
   }
 
   service { 'quantum-plugin-ovs-service':
-    name    => $::quantum::params::ovs_agent_service,
-    enable  => $enable,
-    ensure  => $service_ensure,
-    require => [Package['quantum-plugin-ovs-agent']]
+    name       => $::quantum::params::ovs_agent_service,
+    enable     => $enable,
+    ensure     => $service_ensure,
+    require    => [Package['quantum-plugin-ovs-agent']],
+    hasstatus  => true,
+    hasrestart => true,
   }
 }
