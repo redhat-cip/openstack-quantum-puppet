@@ -14,8 +14,7 @@ class quantum (
   $allow_bulk             = 'True',
   $allow_overlapping_ips  = 'False',
   $control_exchange       = 'quantum',
-  $rabbit_host            = 'localhost',
-  $rabbit_port            = '5672',
+  $rabbit_hosts           = ['localhost'],
   $rabbit_user            = 'guest',
   $rabbit_virtual_host    = '/'
 ) {
@@ -67,8 +66,7 @@ class quantum (
     'DEFAULT/allow_bulk':             value => $allow_bulk;
     'DEFAULT/allow_overlapping_ips':  value => $allow_overlapping_ips;
     'DEFAULT/control_exchange':       value => $control_exchange;
-    'DEFAULT/rabbit_host':            value => $rabbit_host;
-    'DEFAULT/rabbit_port':            value => $rabbit_port;
+    'DEFAULT/rabbit_hosts':           value => join($rabbit_hosts, ',');
     'DEFAULT/rabbit_userid':          value => $rabbit_user;
     'DEFAULT/rabbit_password':        value => $rabbit_password;
     'DEFAULT/rabbit_virtual_host':    value => $rabbit_virtual_host;
