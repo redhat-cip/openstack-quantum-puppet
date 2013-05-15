@@ -36,6 +36,12 @@
 #   (optional) The keystone auth port
 #   Defaults to 35357
 #
+# [*auth_admin_prefix*]
+#   (optional) The admin_prefix used to admin endpoint of the auth host
+#   This allow admin auth URIs like http://auth_host:35357/keystone.
+#   (where '/keystone' is the admin prefix)
+#   Defaults to false for empty. If defined, should be a string with a leading '/' and no trailing '/'.
+#
 # [*auth_tenant*]
 #   (optional) The tenant of the auth user
 #   Defaults to services
@@ -49,16 +55,17 @@
 #   Defaults to http
 #
 class quantum::server (
-  $package_ensure = 'present',
-  $enabled        = true,
-  $auth_password  = false,
-  $auth_type      = 'keystone',
-  $auth_host      = 'localhost',
-  $auth_port      = '35357',
-  $auth_tenant    = 'services',
-  $auth_user      = 'quantum',
-  $auth_protocol  = 'http',
-  $log_file       = '/var/log/quantum/server.log'
+  $package_ensure    = 'present',
+  $enabled           = true,
+  $auth_password     = false,
+  $auth_type         = 'keystone',
+  $auth_host         = 'localhost',
+  $auth_port         = '35357',
+  $auth_admin_prefix = false,
+  $auth_tenant       = 'services',
+  $auth_user         = 'quantum',
+  $auth_protocol     = 'http',
+  $log_file          = '/var/log/quantum/server.log'
 ) {
 
   include quantum::params
@@ -108,7 +115,25 @@ class quantum::server (
         'filter:authtoken/admin_user':        value => $auth_user;
         'filter:authtoken/admin_password':    value => $auth_password;
       }
+
+      if $auth_admin_prefix {
+        validate_re($auth_admin_prefix, '^(/[^/]+)?$')
+        quantum_config {
+          'keystone_authtoken/auth_admin_prefix': value => $auth_admin_prefix;
+        }
+        quantum_api_config {
+          'filter:authtoken/auth_admin_prefix': value => $auth_admin_prefix;
+        }
+      } else {
+        quantum_config {
+          'keystone_authtoken/auth_admin_prefix': ensure => absent;
+        }
+        quantum_api_config {
+          'filter:authtoken/auth_admin_prefix': ensure => absent;
+        }
+      }
     }
+
   }
 
   service {'quantum-server':
